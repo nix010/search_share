@@ -38,5 +38,6 @@ class ReportSearchView(TemplateView):
                 'brands': brands,
                 'share_count': share_count,
             })
+
         except RequestErrorException as e:
             return self.render_to_response({'error': str(e)})
