@@ -1,0 +1,92 @@
+
+<!doctype html>
+<html>
+
+<head>
+  <title>Horizontal Bar Chart</title>
+  <script src="https://www.chartjs.org/dist/2.8.0/Chart.min.js"></script>
+  <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+  <style>
+    canvas {
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+<div id="container" style="width: 100%;">
+  {% if error %}
+    <p><b>{{ error }}</b></p> <br>
+  {% endif %}
+  <form style="align-items: center">
+    <input style="display: block; margin: auto" type="text" name="q" placeholder="Input keyword" value="{{ request.GET.q }}">
+    <br>
+    <input style="display: block; margin: auto" type="number" max="100" min="0" name="limit" placeholder="Limit result" value="{{ request.GET.limit|default:10 }}">
+    <input style="display: block; margin: auto"  type="submit" value="Submit">
+  </form>
+  <canvas id="canvas"></canvas>
+</div>
+<script>
+    var color = Chart.helpers.color;
+    var horizontalBarChartData = {
+        labels: [{% for brand in brands %}"{{ brand|safe }}",{% endfor %}],
+        datasets: [{
+            label: 'Shopee',
+            backgroundColor: color(window.chartColors.orange).alpha(1).rgbString(),
+            borderColor: window.chartColors.orange,
+            borderWidth: 1,
+            data: [{% for count in share_count %}{{ count.0 }} ,{% endfor %}]
+        }, {
+            label: 'Lazada',
+            backgroundColor: color(window.chartColors.blue).alpha(1).rgbString(),
+            borderColor: window.chartColors.blue,
+            data: [{% for count in share_count %}{{ count.1 }} ,{% endfor %}]
+        }]
+    };
+
+    window.onload = function() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        window.myHorizontalBar = new Chart(ctx, {
+            plugins: [{
+                beforeInit: function(chart, options) {
+                    chart.legend.afterFit = function() {
+                        this.height = this.height + 500;
+                    };
+                }
+            }],
+            type: 'horizontalBar',
+            data: horizontalBarChartData,
+            options: {
+                // Elements options apply to all of the options unless overridden in a dataset
+                // In this case, we are setting the border of each horizontal bar to be 2px wide
+                elements: {
+                    rectangle: {
+                        borderWidth: 15,
+                    }
+                },
+
+                responsive: true,
+                legend: {
+                    position: 'right',
+                },
+                scales: {
+                    yAxes: [{
+                        gridLines: {
+                            display:false
+                        },
+                    }],
+                },
+                title: {
+                    display: true,
+                    text: 'Shopee and Lazada report for the first 100 search results (%)'
+                }
+            }
+        });
+
+    };
+</script>
+</body>
+
+</html>
